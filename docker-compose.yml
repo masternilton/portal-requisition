@@ -1,15 +1,23 @@
-version: '3.8'
-
 services:
   app:
     build:
       context: .
+      network: host
       dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_API_URL_DASH: ${VITE_API_URL_DASH}
+    image: ${PROJECT_NAME}-app
+    container_name: ${PROJECT_NAME}-app
+    restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "3000:${PORT}"
     environment:
-      - NODE_ENV=development
-    command: npm run dev -- --host
+      - NODE_ENV=production
+      - PORT=${PORT}
+    networks: [web]  
+
+
+networks:
+  web:
+    driver: bridge

@@ -1,20 +1,45 @@
-# Usa Node 20 (LTS)
-FROM node:20-alpine
+# Etapa de construcción
+FROM node:24-alpine AS builder
 
-# Establece directorio de trabajo
 WORKDIR /app
 
-# Copia package files
+# Argumentos de build para las variables VITE
+ARG VITE_API_URL
+ARG VITE_API_URL_DASH
+
+# Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instala dependencias
-RUN npm install
+# Instalar dependencias
+RUN npm ci
 
-# Copia el resto del código
+# Copiar el resto del código
 COPY . .
 
-# Expone puerto
-EXPOSE 5173
+# Establecer las variables de entorno para el build
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_API_URL_DASH=$VITE_API_URL_DASH
 
-# Comando por defecto
-CMD ["npm", "run", "dev", "--", "--host"]
+# Construir la aplicación
+RUN npm run build
+
+# Etapa de producción
+FROM node:24-alpine AS runner
+
+WORKDIR /app
+
+# Copiar package.json para instalar solo dependencias de producción
+COPY package*.json ./
+
+# Instalar solo dependencias de producción
+RUN npm ci --omit=dev
+
+# Copiar la aplicación construida desde la etapa de build
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/package.json ./package.json
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando para iniciar la aplicación
+CMD ["node", "build"]
