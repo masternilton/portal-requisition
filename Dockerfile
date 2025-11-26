@@ -28,7 +28,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar solo dependencias de producción (omitiendo devDependencies)
-RUN npm ci --omit=dev
+RUN npm ci --force
 
 # Copiar la aplicación construida desde la etapa de build
 # Asumiendo que SvelteKit/Vite deja el output en un directorio llamado 'build'.
