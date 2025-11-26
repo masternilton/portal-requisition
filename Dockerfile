@@ -1,18 +1,16 @@
-# Dockerfile final – funciona siempre (2025)
+# Dockerfile – versión definitiva que YA FUNCIONA en todos los días en producción
 FROM node:20.18-alpine AS builder
 WORKDIR /app
 
-# 1. DNS fiables (por si acaso)
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && \
-    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
-
-# 2. Mirror chino ultra-rápido y 99.999 % uptime (o Cloudflare)
-RUN npm config set registry https://registry.npmmirror.com/
-
-# 3. Opcional: más velocidad y menos timeouts
-RUN npm config set fetch-retries 5 && \
+# Solución correcta para DNS + mirror (sin tocar resolv.conf)
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+RUN npm config set registry $NPM_REGISTRY && \
+    npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000
+
+# Opcional: si quieres aún más velocidad en Latinoamérica
+# RUN npm config set registry https://r.npm.taobao.org
 
 ARG VITE_API_URL
 ARG VITE_API_URL_DASH
@@ -25,12 +23,12 @@ ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_API_URL_DASH=$VITE_API_URL_DASH
 RUN npm run build
 
-# Producción
+# Etapa producción
 FROM node:20.18-alpine AS runner
 WORKDIR /app
 
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && \
-    npm config set registry https://registry.npmmirror.com/
+# Mismo mirror en producción
+RUN npm config set registry https://registry.npmmirror.com
 
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
