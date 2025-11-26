@@ -10,7 +10,7 @@ services:
     container_name: ${PROJECT_NAME}-app
     restart: unless-stopped
     ports:
-      - "3000:${PORT}"
+      - "${PORT}:3000"
     environment:
       - NODE_ENV=production
       - PORT=${PORT}

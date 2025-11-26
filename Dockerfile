@@ -42,4 +42,4 @@ COPY --from=builder /app/package.json ./package.json
 EXPOSE 3000
 
 # Comando para iniciar la aplicación
-CMD ["node", "build"]
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
