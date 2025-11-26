@@ -22,6 +22,21 @@ const actions = {
     if (!token) {
       return { error: "No se recibió token" };
     }
+    const res2 = await fetch(
+      `${config.API_URL}/warehouses?group_id=${apiResponse.group_id}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      }
+    );
+    if (!res2.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || "Hubo un problema al encontrar el Almacen central" };
+    }
+    const apiResponse2 = await res2.json();
+    const warehouses = apiResponse2.data ?? [];
     const user = {
       id: apiResponse.id,
       name: apiResponse.name,
@@ -35,8 +50,13 @@ const actions = {
       account: {
         id: apiResponse.account_id,
         name: apiResponse.account_name
-      }
+      },
+      warehouses: warehouses ?? []
     };
+    if (warehouses.length == 0) {
+      const err = await res.json().catch(() => ({}));
+      return { error: err.message || "No existe Almacen Central para su cuenta" };
+    }
     cookies.set("token", token, {
       httpOnly: true,
       secure: true,

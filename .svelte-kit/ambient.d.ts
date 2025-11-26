@@ -28,6 +28,7 @@
 declare module '$env/static/private' {
 	export const VITE_API_URL: string;
 	export const VITE_API_URL_DASH: string;
+	export const PROJECT_NAME: string;
 	export const ACSetupSvcPort: string;
 	export const ALLUSERSPROFILE: string;
 	export const AMDRMPATH: string;
@@ -154,6 +155,7 @@ declare module '$env/dynamic/private' {
 	export const env: {
 		VITE_API_URL: string;
 		VITE_API_URL_DASH: string;
+		PROJECT_NAME: string;
 		ACSetupSvcPort: string;
 		ALLUSERSPROFILE: string;
 		AMDRMPATH: string;

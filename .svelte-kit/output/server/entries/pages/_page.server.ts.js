@@ -4,9 +4,8 @@ const load = async ({ locals, fetch }) => {
   if (!locals.user?.token) {
     throw redirect(303, "/login");
   }
-  console.log("INGRESO A LAS REQUI");
   try {
-    const res = await fetch(`${config.API_URL}/requisitions`, {
+    const res = await fetch(`${config.API_URL}/requisitions?account_id=${locals.user?.account?.id}`, {
       headers: {
         "Authorization": `Bearer ${locals.user.token}`
       }
@@ -19,7 +18,6 @@ const load = async ({ locals, fetch }) => {
     }
     const response = await res.json();
     const data = response.data ?? [];
-    console.log(data.data);
     const requisitions = data.data ?? [];
     return {
       requisitions

@@ -22,11 +22,13 @@ const actions = {
     if (!Array.isArray(currentItems) || currentItems.length === 0) {
       return { success: false, error: "No hay ítems válidos" };
     }
+    let warehouse = locals.user?.warehouses[0] ?? {};
     const payload = {
-      warehouse_id: "9da25889-c17e-11f0-84b9-fa163e70135a",
+      account_id: locals.user?.account.id,
+      warehouse_id: warehouse.id,
       week_number: 1,
       description: "REQUISICIÓN",
-      observations: "Requisición de almacen central",
+      observations: "Requisición a almacen central",
       requisition_details: currentItems.map((item) => ({
         brand_id: item.id,
         capacity: item.capacidad,
