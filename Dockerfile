@@ -1,16 +1,10 @@
-# Dockerfile – versión definitiva que YA FUNCIONA en todos los días en producción
-FROM node:20.18-alpine AS builder
+FROM node:20.19.0-alpine AS builder
 WORKDIR /app
 
-# Solución correcta para DNS + mirror (sin tocar resolv.conf)
-ARG NPM_REGISTRY=https://registry.npmmirror.com
-RUN npm config set registry $NPM_REGISTRY && \
+# Mirror ultra-estable + retries
+RUN npm config set registry https://registry.npmmirror.com && \
     npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000
-
-# Opcional: si quieres aún más velocidad en Latinoamérica
-# RUN npm config set registry https://r.npm.taobao.org
+    npm config set fetch-retry-mintimeout 20000
 
 ARG VITE_API_URL
 ARG VITE_API_URL_DASH
@@ -23,11 +17,10 @@ ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_API_URL_DASH=$VITE_API_URL_DASH
 RUN npm run build
 
-# Etapa producción
-FROM node:20.18-alpine AS runner
+# Runner
+FROM node:20.19.0-alpine AS runner
 WORKDIR /app
 
-# Mismo mirror en producción
 RUN npm config set registry https://registry.npmmirror.com
 
 COPY package*.json ./
