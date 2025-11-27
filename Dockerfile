@@ -16,8 +16,8 @@ ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_API_URL_DASH=$VITE_API_URL_DASH
 
 # El entrypoint hace la magia
-COPY docker/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY docker/app_entry.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/app_entry.sh
 ENTRYPOINT ["app_entry.sh"]
 
 EXPOSE 3000
