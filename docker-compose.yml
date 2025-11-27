@@ -3,26 +3,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      network: host
+      network: host                   # ← para el build (ya lo tenías)
       args:
         VITE_API_URL: ${VITE_API_URL}
         VITE_API_URL_DASH: ${VITE_API_URL_DASH}
     image: ${PROJECT_NAME}-app
     container_name: ${PROJECT_NAME}-app
+    network_mode: host                  # ← ESTA LÍNEA ES LA QUE FALTABA
     restart: unless-stopped
-    env_file:
-      - .env
     ports:
       - "${PORT}:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=${PORT}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - web  
-
-
-networks:
-  web:
-    driver: bridge
