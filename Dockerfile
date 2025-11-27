@@ -1,39 +1,23 @@
-# Dockerfile – funciona aunque tu VPS pierda internet 10 veces
-FROM node:20.19.0-alpine AS builder
+FROM node:20.19.0-alpine
+
 WORKDIR /app
 
-# 1. Usamos el registry oficial pero con retries brutales
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm config set fetch-retries 10 && \
-    npm config set fetch-retry-mintimeout 30000 && \
-    npm config set fetch-retry-maxtimeout 300000 && \
-    npm config set prefer-offline true
-
-ARG VITE_API_URL
-ARG VITE_API_URL_DASH
-
-# 2. Instalamos dependencias (esta capa se cachea para siempre)
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
-
-# 3. COPIAMOS TODO EL CÓDIGO ANTES del build → así npm/yarn/pnpm nunca vuelve a internet
-COPY . .
-
-# 4. Forzamos modo 100 % offline para el build
-ENV npm_config_offline=true
-ENV npm_config_cache=/tmp/.npm
-RUN npm run build
-
-# ——————————————————————
-FROM node:20.19.0-alpine AS runner
-WORKDIR /app
-
-RUN npm config set registry https://registry.npmjs.org/
-
+# Solo dependencias de producción (rapidísimo)
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-COPY --from=builder /app/build ./build
+# Copiamos código fuente (pero sin node_modules ni build)
+COPY . .
+
+# Variables de entorno Vite en tiempo de build
+ARG VITE_API_URL
+ARG VITE_API_URL_DASH
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_API_URL_DASH=$VITE_API_URL_DASH
+
+# El entrypoint hace la magia
+COPY docker/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["app_entry.sh"]
 
 EXPOSE 3000
-CMD ["node", "build/index.js"]
