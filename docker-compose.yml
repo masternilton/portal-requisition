@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      network: host
       args:
         VITE_API_URL: ${VITE_API_URL}
         VITE_API_URL_DASH: ${VITE_API_URL_DASH}
@@ -14,7 +15,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=${PORT}
-    networks: [web]  
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - web  
 
 
 networks:
